@@ -78,8 +78,9 @@ Exch | + key_share (traditional + KEM key share)*
                                         {EncryptedExtensions}  ^  Server
                                         {CertificateRequest*}  v  Params
                                                {Certificate*}  ^
-Auth | {ClientKemCiphertext*}
-     | {Finished}
+Auth | {ClientKemCiphertext*}                                  |  Auth
+     | {Finished}                                              |
+                                                  {Finished*}  |
                                                                v
                                <--------  [Application Data*]
 
