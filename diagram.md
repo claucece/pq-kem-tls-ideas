@@ -1,0 +1,157 @@
+# PQ KEM TLS
+
+## TLS 1.3
+
+Figure 1 below shows the basic full TLS handshake:
+
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + key_share*
+     | + signature_algorithms*
+     | + psk_key_exchange_modes*
+     v + pre_shared_key*       -------->
+                                                  ServerHello  ^ Key
+                                                 + key_share*  | Exch
+                                            + pre_shared_key*  v
+                                        {EncryptedExtensions}  ^  Server
+                                        {CertificateRequest*}  v  Params
+                                               {Certificate*}  ^
+                                         {CertificateVerify*}  | Auth
+                                                   {Finished}  v
+                               <--------  [Application Data*]
+     ^ {Certificate*}
+Auth | {CertificateVerify*}
+     v {Finished}              -------->
+       [Application Data]      <------->  [Application Data]
+
+              +  Indicates noteworthy extensions sent in the
+                 previously noted message.
+
+              *  Indicates optional or situation-dependent
+                 messages/extensions that are not always sent.
+
+              {} Indicates messages protected using keys
+                 derived from a [sender]_handshake_traffic_secret.
+
+              [] Indicates messages protected using keys
+                 derived from [sender]_application_traffic_secret_N.
+
+               Figure 1: Message Flow for Full TLS Handshake
+
+The handshake can be thought of as having three phases (indicated in
+the diagram above):
+
+-  Key Exchange: Establish shared keying material and select the
+   cryptographic parameters.  Everything after this phase is
+   encrypted.
+
+-  Server Parameters: Establish other handshake parameters
+   (whether the client is authenticated, application-layer protocol
+   support, etc.).
+
+-  Authentication: Authenticate the server (and, optionally, the
+   client) and provide key confirmation and handshake integrity.
+
+In the Key Exchange phase, the client sends the ClientHello message,
+which contains a random nonce (ClientHello.random); its offered protocol
+versions; a list of symmetric cipher/HKDF hash pairs; either a set of
+Diffie-Hellman key shares (in the "key_share" extension), a set of
+pre-shared key labels (in the "pre_shared_key" extension), or both; and
+potentially additional extensions. Additional fields and/or messages may also
+be present for middlebox compatibility.
+
+## PQ KEM TLS 1.3 for Server Authentication
+
+Figure 1 below shows the basic full PQ KEM TLS handshake:
+
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + key_share (traditional + KEM key share)*
+     | + signature_algorithms (traditional + KEM)*
+     | + psk_key_exchange_modes*
+     v + pre_shared_key*       -------->
+                                                  ServerHello  ^ Key
+                    + key_share* (traditional + KEM key share) | Exch
+                                            + pre_shared_key*  v
+                                        {EncryptedExtensions}  ^  Server
+                                        {CertificateRequest*}  v  Params
+                                               {Certificate*}  ^
+Auth | {ClientKemCiphertext*}
+     | {Finished}
+                                                               v
+                               <--------  [Application Data*]
+
+              +  Indicates noteworthy extensions sent in the
+                 previously noted message.
+
+              *  Indicates optional or situation-dependent
+                 messages/extensions that are not always sent.
+
+              {} Indicates messages protected using keys
+                 derived from a [sender]_handshake_traffic_secret.
+
+              [] Indicates messages protected using keys
+                 derived from [sender]_application_traffic_secret_N.
+
+               Figure 1: Message Flow for Full TLS Handshake
+
+In the Key Exchange phase, the client sends the ClientHello message,
+which contains a random nonce (ClientHello.random); its offered protocol
+versions (which must include TLS 1.3); a list of symmetric cipher/HKDF hash pairs;
+either a set of Diffie-Hellman key shares and KEM keyshares (in
+the "key_share" extension, with the corresponding "supported_group" extension -with the
+corresponding KEM groups offered in it-), a set of pre-shared key labels (in
+the "pre_shared_key" extension), or both; the signature_algorithms extension with the
+corresponding KEM group (A "signature_algorithms_dc" extension may also be
+added to indicate delegated credential signature algorithms), and potentially
+additional extensions. Additional fields and/or messages may also be present for
+middlebox compatibility.
+
+The server processes the ClientHello and determines the appropriate
+cryptographic parameters for the connection.  It then responds with
+its own ServerHello, which indicates the negotiated connection parameters.
+The combination of the ClientHello and the ServerHello determines the shared
+keys.  If KEM key establishment is in use, then the ServerHello contains
+a "key_share" extension with the server's ephemeral KEM share; the server's
+share MUST be in the same group as one of the client's shares.  If PSK key
+establishment is in use, then the ServerHello contains a "pre_shared_key"
+extension indicating which of the client's offered PSKs was selected.
+Note that implementations can use KEM, (EC)DHE and PSK together, in which case
+both extensions will be supplied.
+
+The server then sends a message to establish the Server Parameters:
+
+EncryptedExtensions:  responses to ClientHello extensions that are
+   not required to determine the cryptographic parameters, other than
+   those that are specific to individual certificates.
+   [Section 4.3.1]
+
+Finally, the client and server exchange Authentication messages. PQ KEM TLS
+uses the same set of messages every time that certificate-based
+authentication is needed.  (PSK-based authentication happens as a
+side effect of key exchange.)  Specifically:
+
+Certificate:  The certificate of the endpoint and any per-certificate
+   extensions.  This message is omitted by the server if not
+   authenticating with a certificate. The long-term KEM public key
+   should be in it.
+
+ClientKEMCiphertext: an encapsulation against the long-term KEM public key,
+   which yield an implicitly unauthenticated shared secret, used to derive
+   authenticated handshake traffic secrets and a master secret.
+
+Finished:  A MAC (Message Authentication Code) over the entire
+   handshake.  This message provides key confirmation, binds the
+   endpoint's identity to the exchanged keys, and in PSK mode also
+   authenticates the handshake.  [Section 4.4.4]
+
+At this point, the handshake is complete, and the client and server
+derive the keying material required by the record layer to exchange
+application-layer data protected through authenticated encryption.
+Application Data MUST NOT be sent prior to sending the Finished
+message, except as specified in Section 2.3.  Note that while the
+server may send Application Data prior to receiving the client's
+Authentication messages, any data sent at that point is, of course,
+being sent to an unauthenticated peer.
