@@ -69,17 +69,14 @@ Figure 2 below shows the basic full server auth PQ KEM TLS handshake:
 
 Key  ^ ClientHello
 Exch | + key_share (traditional + KEM key share)*
-     | + signature_algorithms (traditional + KEM)*
-     | + psk_key_exchange_modes*
-     v + pre_shared_key*       -------->
+     v + signature_algorithms (traditional + KEM)* -------->
                                                   ServerHello  ^ Key
-                    + key_share* (traditional + KEM key share) | Exch
-                                            + pre_shared_key*  v
-                                        {EncryptedExtensions}  ^  Server Params
-                                               {Certificate*}  ^
-Auth | {ClientKemCiphertext*}                                  |  Auth
+                    + key_share* (traditional + KEM key share) v Exch
+                                        {EncryptedExtensions}  | Server Params
+                                               {Certificate}   ^
+Auth | {ClientKemCiphertext}                                   |  Auth
      | {Finished}                                              |
-     |  [Application Data*]     -------->                      |
+     | [Application Data*]     -------->                       |
      |                                             {Finished}  |
  v   |                                                         v
        [Application Data]      <------->  [Application Data]
@@ -165,20 +162,17 @@ Figure 3 below shows the basic full server and client auth PQ KEM TLS handshake:
 
 Key  ^ ClientHello
 Exch | + key_share (traditional + KEM key share)*
-     | + signature_algorithms (traditional + KEM)*
-     | + psk_key_exchange_modes*
-     v + pre_shared_key*       -------->
+     v + signature_algorithms (traditional + KEM)* -------->
                                                   ServerHello  ^ Key
-                    + key_share* (traditional + KEM key share) | Exch
-                                            + pre_shared_key*  v
+                    + key_share* (traditional + KEM key share) v Exch
                                         {EncryptedExtensions}  ^  Server
                                         {CertificateRequest*}  v  Params
                                                {Certificate*}  ^
 Auth | {ClientKemCiphertext*}                                  |  Auth
-     | {Certificate*}                                          |
-     |                                 {ServerKEMCiphertext*}  |
-     | {Finished}                                              |
-     |  [Application Data*]     -------->                      |
+     | {Certificate*}           -------->                      |
+     |                         <------ {ServerKEMCiphertext*}  |
+     | {Finished}               -------->                      |
+     | [Application Data*]      -------->                      |
                                                    {Finished}  |
                                                                v
        [Application Data]      <------->  [Application Data]
