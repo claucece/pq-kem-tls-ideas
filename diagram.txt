@@ -37,7 +37,7 @@ Auth | {CertificateVerify*}
               [] Indicates messages protected using keys
                  derived from [sender]_application_traffic_secret_N.
 
-               Figure 1: Message Flow for Full TLS Handshake
+               Diagram 1: Message Flow for Full TLS Handshake
 
 The handshake can be thought of as having three phases (indicated in
 the diagram above):
@@ -93,7 +93,7 @@ Auth | {ClientKemCiphertext}                                   |  Auth
               [] Indicates messages protected using keys
                  derived from [sender]_application_traffic_secret_N.
 
-               Figure 2: Message Flow for Full TLS Server Auth Handshake
+               Diagram 2: Message Flow for PQ KEMTLS with Server Auth Handshake
 
 In the Key Exchange phase, the client sends the ClientHello message,
 which contains a random nonce (ClientHello.random); its offered protocol
@@ -189,7 +189,7 @@ Auth | {ClientKemCiphertext*}                                  |  Auth
               [] Indicates messages protected using keys
                  derived from [sender]_application_traffic_secret_N.
 
-               Figure 3: Message Flow for Full TLS Server and Client Auth Handshake
+               Diagram 3: Message Flow for PQ KEMTLS with mutual Auth Handshake
 
 ### Phase 1: Ephemeral key exchange using KEMs
 
