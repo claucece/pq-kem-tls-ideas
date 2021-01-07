@@ -73,12 +73,12 @@ Exch | + key_share (traditional + KEM key share)*
                                                   ServerHello  ^ Key
                     + key_share* (traditional + KEM key share) v Exch
                                         {EncryptedExtensions}  | Server Params
-                                               {Certificate}   ^
+     ^                                         {Certificate}   ^
 Auth | {ClientKemCiphertext}                                   |  Auth
      | {Finished}                                              |
      | [Application Data*]     -------->                       |
      |                         <-------            {Finished}  |
- v   |                                                         v
+     v                                                         v
        [Application Data]      <------->  [Application Data]
 
               +  Indicates noteworthy extensions sent in the
@@ -167,13 +167,13 @@ Exch | + key_share (traditional + KEM key share)*
                     + key_share* (traditional + KEM key share) v Exch
                                         {EncryptedExtensions}  ^  Server
                                         {CertificateRequest*}  v  Params
-                                               {Certificate*}  ^
+     ^                                         {Certificate*}  ^
 Auth | {ClientKemCiphertext*}                                  |  Auth
      | {Certificate*}           -------->                      |
      |                         <------ {ServerKEMCiphertext*}  |
      | {Finished}               -------->                      |
      | [Application Data*]      -------->                      |
-                                <-------           {Finished}  |
+     v                          <-------           {Finished}  |
                                                                v
        [Application Data]      <------->  [Application Data]
 
