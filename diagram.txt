@@ -77,7 +77,7 @@ Exch | + key_share (traditional + KEM key share)*
 Auth | {ClientKemCiphertext}                                   |  Auth
      | {Finished}                                              |
      | [Application Data*]     -------->                       |
-     |                                             {Finished}  |
+     |                         <-------            {Finished}  |
  v   |                                                         v
        [Application Data]      <------->  [Application Data]
 
@@ -173,7 +173,7 @@ Auth | {ClientKemCiphertext*}                                  |  Auth
      |                         <------ {ServerKEMCiphertext*}  |
      | {Finished}               -------->                      |
      | [Application Data*]      -------->                      |
-                                                   {Finished}  |
+                                <-------           {Finished}  |
                                                                v
        [Application Data]      <------->  [Application Data]
 
