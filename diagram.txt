@@ -189,7 +189,7 @@ Auth | {ClientKemCiphertext*}                                  |  Auth
               [] Indicates messages protected using keys
                  derived from [sender]_application_traffic_secret_N.
 
-               Diagram 3: Message Flow for PQ KEMTLS with mutual Auth Handshake
+               Diagram 2: Message Flow for PQ KEMTLS with mutual Auth Handshake
 
 ### Phase 1: Ephemeral key exchange using KEMs
 
